@@ -10,31 +10,31 @@ from cocotb.triggers import ClockCycles
 async def test_project(dut):
     dut._log.info("Start")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
-    cocotb.start_soon(clock.start())
+    module bitwise_majority_tb;
+    reg [7:0] A;
+    reg [7:0] B;
+    wire [7:0] C;
 
-    # Reset
-    dut._log.info("Reset")
-    dut.ena.value = 1
-    dut.ui_in.value = 0
-    dut.uio_in.value = 0
-    dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
-    dut.rst_n.value = 1
+    // Instantiate the design under test (DUT)
+    bitwise_majority dut (
+        .A(A),
+        .B(B),
+        .C(C)
+    );
 
-    dut._log.info("Test project behavior")
+    initial begin
+        // Monitor the signals
+        $monitor("Time = %0d | A = %b | B = %b | C = %b", $time, A, B, C);
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
+        // Test cases
+        A = 8'b11001010; B = 8'b10101010; #10;
+        A = 8'b11110000; B = 8'b11111111; #10;
+        A = 8'b00001111; B = 8'b00000000; #10;
+        A = 8'b10101010; B = 8'b01010101; #10;
+        A = 8'b11111111; B = 8'b11111111; #10;
+        A = 8'b00000000; B = 8'b00000000; #10;
 
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+        // End simulation
+        $finish;
+    end
+endmodule
